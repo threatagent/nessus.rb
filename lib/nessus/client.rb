@@ -4,7 +4,6 @@ require 'json'
 require 'nessus/client/file'
 require 'nessus/client/policy'
 require 'nessus/client/report'
-require 'nessus/client/report2'
 require 'nessus/client/scan'
 
 module Nessus
