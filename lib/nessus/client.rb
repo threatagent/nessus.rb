@@ -54,20 +54,20 @@ module Nessus
       true
     end
 
-    # @return [String] {#inspect}'s output with a censored session token
-    def inspect
-      inspected = super
-
-      if connection
-        cookie = CGI::Cookie.parse(connection.headers[:cookie])
-
-        if cookie.keys.include? 'token'
-          inspected.gsub cookie['token'], ('*' * cookie['token'].length)
-        end
-      end
-
-      inspected
-    end
+#    # @return [String] {#inspect}'s output with a censored session token
+#    def inspect
+#      inspected = super
+#
+#      if connection
+#        cookie = CGI::Cookie.parse(connection.headers[:cookie])
+#
+#        if cookie.keys.include? 'token'
+#          inspected.gsub cookie['token'].to_s, ('*' * cookie['token'].to_s.length)
+#        end
+#      end
+#
+#      inspected
+#    end
 
     # @param [String] url the URL/path to send a GET request using the
     #   connection object and default headers/parameters

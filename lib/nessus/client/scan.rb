@@ -24,7 +24,7 @@ module Nessus
           raise Nessus::UnknownError, resp['reply']['contents']
         end
 
-        resp['reply']['contents']['scan']
+        resp['reply']['contents'] # ['scan']
       end
 
       # GET /scan/list
@@ -33,7 +33,7 @@ module Nessus
       def scans
         resp = get '/scan/list'
 
-        resp['reply']['contents']['scans']['scan']
+        resp['reply']['contents']
       end
     end
   end
