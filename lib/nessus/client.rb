@@ -25,7 +25,7 @@ module Nessus
       @verify_ssl = Nessus::Client.verify_ssl.nil? ? true : false
       @connection = Faraday.new host, :ssl => { :verify => @verify_ssl }
 
-      authenticate(login, password)
+      #authenticate(login, password)
     end
 
     def authenticate(login, password)
