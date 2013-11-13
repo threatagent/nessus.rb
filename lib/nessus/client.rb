@@ -18,7 +18,7 @@ module Nessus
       attr_accessor :verify_ssl
     end
 
-    attr_reader :connection, :token
+    attr_reader :connection
 
     def initialize(host, login = nil, password = nil)
       @verify_ssl = Nessus::Client.verify_ssl.nil? ? true : false
@@ -35,7 +35,7 @@ module Nessus
       json = JSON.parse(resp.body)
 
       if json['reply']['status'].eql? 'OK'
-        @token = json['reply']['contents']['token']
+        connection.headers[:cookie][:token] = json['reply']['contents']['token']
       end
 
       true
@@ -44,8 +44,9 @@ module Nessus
     def inspect
       inspected = super
 
-      if @token
-        inspected.gsub @token, ('*' * @token.length)
+      token = connection.headers[:cookie][:token]
+      if token
+        inspected.gsub token, ('*' * token.length)
       end
 
       inspected
