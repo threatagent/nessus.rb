@@ -1,6 +1,7 @@
+require 'cgi'
 require 'faraday'
 require 'json'
-
+require 'pry'
 require 'nessus/client/file'
 require 'nessus/client/policy'
 require 'nessus/client/report'
@@ -21,11 +22,9 @@ module Nessus
 
     attr_reader :connection
 
-    def initialize(host, login = nil, password = nil)
+    def initialize(host)
       @verify_ssl = Nessus::Client.verify_ssl.nil? ? true : false
       @connection = Faraday.new host, :ssl => { :verify => @verify_ssl }
-
-      #authenticate(login, password)
     end
 
     def authenticate(login, password)
@@ -35,10 +34,9 @@ module Nessus
         :json => 1
       }
       resp = post '/login', payload
-      json = JSON.parse(resp.body)
 
-      if json['reply']['status'].eql? 'OK'
-        connection.headers[:cookie][:token] = json['reply']['contents']['token']
+      if resp['reply']['status'].eql? 'OK'
+        connection.headers[:cookie] = "token=#{resp['reply']['contents']['token']}"
       end
 
       true
@@ -47,26 +45,33 @@ module Nessus
     def inspect
       inspected = super
 
-      token = connection.headers[:cookie][:token]
-      if token
-        inspected.gsub token, ('*' * token.length)
+      if connection
+        cookie = CGI::Cookie.parse(connection.headers[:cookie])
+
+        if cookie.keys.include? 'token'
+          inspected.gsub cookie['token'], ('*' * cookie['token'].length)
+        end
       end
 
       inspected
     end
 
     def get(url, params = {}, headers = {})
-      require 'pry'
-      binding.pry
+      params ||= {}
+      params[:json] ||= 1
 
+      params  = connection.params.merge(params)
+      headers = connection.headers.merge(headers)
+      resp    = connection.get url, params, headers
       JSON.parse(resp.body)
-      # connection.params.merge(params)
-      # connection.headers.merge(params)
-      # connection.get(url, )
     end
 
-    def post(url, payload, *args)
-      connection.post(url, payload, *args)
+    def post(url, payload = nil, headers = nil, &block)
+      payload ||= {}
+      payload[:json] ||= 1
+
+      resp = connection.post(url, payload, headers, &block)
+      JSON.parse(resp.body)
     end
   end
 end

@@ -2,7 +2,8 @@ module Nessus
   class Client
     module Report
       def reports
-        resp = get '/reports/list'
+        resp = get '/report/list'
+
         resp['reply']['contents']['reports']['report']
       end
     end
