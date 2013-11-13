@@ -4,6 +4,7 @@ require 'json'
 require 'nessus/client/file'
 require 'nessus/client/policy'
 require 'nessus/client/report'
+require 'nessus/client/report2'
 require 'nessus/client/scan'
 
 module Nessus
@@ -11,6 +12,7 @@ module Nessus
     include Nessus::Client::File
     include Nessus::Client::Policy
     include Nessus::Client::Report
+    include Nessus::Client::Report2
     include Nessus::Client::Scan
 
     class << self
@@ -22,6 +24,8 @@ module Nessus
     def initialize(host, login = nil, password = nil)
       @verify_ssl = Nessus::Client.verify_ssl.nil? ? true : false
       @connection = Faraday.new host, :ssl => { :verify => @verify_ssl }
+
+      authenticate(login, password)
     end
 
     def authenticate(login, password)
