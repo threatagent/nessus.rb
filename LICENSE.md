@@ -1,4 +1,4 @@
-Copyright (c) 2013 Erran Carey
+Copyright (c) 2013 Erran Carey, Marcus J. Carey
 
 MIT License
 
