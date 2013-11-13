@@ -8,6 +8,8 @@ module Nessus
       # @param [Fixnum] policy_id a numeric ID that references the policy to use
       # @param [String] scan_name the name to assign to this scan
       # @param [Fixnum] seq a unique identifer for the specific request
+      #
+      # @return [Hash] the newly created scan object
       def create_scan(target, policy_id, scan_name, seq = nil)
         payload = {
           :target => target,
@@ -17,6 +19,10 @@ module Nessus
         }
         payload[:seq] = seq if seq
         resp = post '/scan/new', payload
+
+        if resp['reply']['status'].eql? 'ERROR'
+          raise Nessus::UnknownError, resp['reply']['contents']
+        end
 
         resp['reply']['contents']['scan']
       end

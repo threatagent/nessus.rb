@@ -1,12 +1,12 @@
 require 'cgi'
 require 'faraday'
 require 'json'
-require 'pry'
 require 'nessus/client/file'
 require 'nessus/client/policy'
 require 'nessus/client/report'
 require 'nessus/client/report2'
 require 'nessus/client/scan'
+require 'nessus/error'
 require 'nessus/version'
 
 module Nessus
