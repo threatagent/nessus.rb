@@ -3,7 +3,7 @@ module Nessus
     # @author Erran Carey <me@errancarey.com>
     module Policy
       # GET /policy/list
-      def policies
+      def policy_list
         resp = get '/policy/list'
         resp['reply']['contents']['policies']['policy']
       end
