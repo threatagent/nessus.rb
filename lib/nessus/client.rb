@@ -29,11 +29,12 @@ module Nessus
     attr_reader :connection
 
     # @param [String] host the base URL to use when connecting to the Nessus API
-    def initialize(host)
+    def initialize(host, login = nil, password = nil)
       @verify_ssl = Nessus::Client.verify_ssl.nil? ? true : false
       @connection = Faraday.new host, :ssl => { :verify => @verify_ssl }
-
       @connection.headers[:user_agent] = "Nessus.rb v#{Nessus::VERSION}".freeze
+
+      authenticate(login, password) if login && password
     end
 
     # POST /login
