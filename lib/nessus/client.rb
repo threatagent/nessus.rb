@@ -32,6 +32,7 @@ module Nessus
     def initialize(host)
       @verify_ssl = Nessus::Client.verify_ssl.nil? ? true : false
       @connection = Faraday.new host, :ssl => { :verify => @verify_ssl }
+
       @connection.headers[:user_agent] = "Nessus.rb v#{Nessus::VERSION}".freeze
     end
 
@@ -45,7 +46,8 @@ module Nessus
         :password => password,
         :json => 1
       }
-      resp = post '/login', payload
+      resp = connection.post '/login', payload
+      resp = JSON.parse(resp.body)
 
       if resp['reply']['status'].eql? 'OK'
         connection.headers[:cookie] = "token=#{resp['reply']['contents']['token']}"
@@ -53,27 +55,44 @@ module Nessus
 
       true
     end
+    alias_method :login, :authenticate
 
-#    # @return [String] {#inspect}'s output with a censored session token
-#    def inspect
-#      inspected = super
-#
-#      if connection
-#        cookie = CGI::Cookie.parse(connection.headers[:cookie])
-#
-#        if cookie.keys.include? 'token'
-#          inspected.gsub cookie['token'].to_s, ('*' * cookie['token'].to_s.length)
-#        end
-#      end
-#
-#      inspected
-#    end
+    # POST /logout
+    #
+    # @param [String] login the username of the account to use for authentication
+    # @param [String] password the password of the account to use for authentication
+    def logout
+      resp = post '/logout', :json => 1
+
+      if resp['reply']['status'].eql? 'OK'
+        if connection.headers[:cookie].include? 'token='
+          connection.headers.delete(:cookie)
+        else
+          # TODO: Instead of warning the user
+          # and deleting the cookies anyway delete only the token
+
+          $stdout.puts 'Deleting cookies...'
+          connection.headers.delete(:cookie)
+        end
+      end
+
+      true
+    end
+
+    def authenticated?
+      headers = connection.headers
+      !!headers[:cookie] && headers[:cookie].include?('token=')
+    end
 
     # @param [String] url the URL/path to send a GET request using the
     #   connection object and default headers/parameters
     # @param [Hash] params the query parameters to send with the request
     # @param [Hash] headers the headers to send along with the request
     def get(url, params = {}, headers = {})
+      unless authenticated?
+        raise Nessus::Forbidden, 'Unable to detect a session token cookie, use #authenticate before sending any other requests'
+      end
+
       params ||= {}
       params[:json] ||= 1
 
@@ -88,6 +107,10 @@ module Nessus
     # @param [Hash] payload the JSON body to send with the request
     # @param [Hash] headers the headers to send along with the request
     def post(url, payload = nil, headers = nil, &block)
+      unless authenticated?
+        raise Nessus::Forbidden, 'Unable to detect a session token cookie, use #authenticate before sending any other requests'
+      end
+
       payload ||= {}
       payload[:json] ||= 1
 
