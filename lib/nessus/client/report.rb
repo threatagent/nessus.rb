@@ -92,22 +92,21 @@ module Nessus
       # @return [Array] of hostnames/IP addresses
       def report_hostlist(report)
         hostlist = report_hosts(report)['hostlist']['host']
-        if hostlist.class == Array
+        if hostlist.is_a? Array
           hostlist.map {|host| host['hostname']}
         else
-          Array[hostlist['hostname']]
+          [hostlist['hostname']]
         end
       end
 
       # @return [Array<Array>] of port numbers and protocol
       def report_portlist(report, ip_address)
-        ports = report_ports(report, ip_address)['portlist']
-        if ports
-          ports['port'].map do |port|
-            [port['portnum'], port['protocol']]
-          end
-        else
-          nil
+        ports = report_ports(report, ip_address)['portlist']['port']
+        if ports.is_a? Hash
+          ports = [ports]
+        end
+        ports.map do |port|
+          [port['portnum'], port['protocol']]
         end
       end
 
