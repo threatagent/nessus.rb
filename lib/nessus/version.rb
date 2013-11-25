@@ -1,4 +1,4 @@
 module Nessus
   # The version of the Nessus.rb library
-  VERSION = '0.1.0.beta.1'
+  VERSION = '0.1.0.beta.2'
 end
