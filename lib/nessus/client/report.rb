@@ -38,7 +38,6 @@ module Nessus
         response['reply']['contents']
       end
 
-
       # POST /report/ports
       #
       # @param [String] report unique identifier
@@ -88,7 +87,37 @@ module Nessus
         response['reply']['contents']
       end
 
+      # @!group Report Auxiliary methods
+      #
+      # @return [Array] of hostnames/IP addresses
+      def report_hostlist(report)
+        hostlist = report_hosts(report)['hostlist']['host']
+        if hostlist.class == Array
+          hostlist.map {|host| host['hostname']}
+        else
+          Array[hostlist['hostname']]
+        end
+      end
 
+      # @return [Array<Array>] of port numbers and protocol
+      def report_portlist(report, ip_address)
+        ports = report_ports(report, ip_address)['portlist']
+        if ports
+          ports['port'].map do |port|
+            [port['portnum'], port['protocol']]
+          end
+        else
+          nil
+        end
+      end
+
+      # @return [Array<Hash>] reports by readablename regex
+      def report_find_all(name)
+        report_list.find_all do |report|
+          report['readablename'] =~ /#{name}/i
+        end
+      end
+      # @!endgroup
     end
   end
 end
