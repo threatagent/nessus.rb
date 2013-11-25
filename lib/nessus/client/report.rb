@@ -36,6 +36,8 @@ module Nessus
       def report_hosts(report)
         response = get '/report/hosts', :report => report
         response['reply']['contents']
+      rescue
+        []
       end
 
       # POST /report/ports
