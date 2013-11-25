@@ -97,6 +97,8 @@ module Nessus
         else
           [hostlist['hostname']]
         end
+      rescue
+        []
       end
 
       # @return [Array<Array>] of port numbers and protocol
