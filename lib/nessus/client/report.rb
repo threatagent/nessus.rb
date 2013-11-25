@@ -116,6 +116,10 @@ module Nessus
           report['readablename'] =~ /#{name}/i
         end
       end
+
+      def report_readablename(name)
+        report_list.find{|report| report['name'].eql? name}['readablename']
+      end
       # @!endgroup
     end
   end
