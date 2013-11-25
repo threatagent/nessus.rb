@@ -21,11 +21,15 @@ module Nessus
       # @return [String] looks up policy ID by policy name
       def policy_id_by_name(name)
         policy_list.find{|policy| policy['policyname'].eql? name}['policyid']
+      rescue
+        nil
       end
 
       # @return [String] looks up policy name by policy ID
       def policy_name_by_id(id)
         policy_list.find{|policy| policy['policyid'].eql? id}['policyname']
+      rescue
+        nil
       end
 
       #@!endgroup
