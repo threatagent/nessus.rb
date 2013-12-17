@@ -124,6 +124,35 @@ module Nessus
       def report_readablename(name)
         report_list.find{|report| report['name'].eql? name}['readablename']
       end
+
+      def report_findings(report)
+        hosts = report_hostlist(report)
+        ports = hosts.map do |host|
+          report_portlist(report, host)
+        end
+
+        hosts_and_ports= hosts.zip(ports).map do |key, value|
+          {
+            key => value
+          }
+        end
+
+        hosts_and_ports_hash = hosts_and_ports.inject(:merge)
+        report_element_array = hosts_and_ports_hash.map do |key, values|
+          {
+            key => values.map do |value|
+              {
+                'port_number' => value.first,
+                'port_type' => value.last,
+                'findings' => report_details(report, key, value.first, value.last)
+              }
+            end
+          }
+        end
+
+        report_hash = report_element_array.inject(:merge)
+        json_report = JSON.pretty_generate(report_hash)
+      end
       # @!endgroup
     end
   end
