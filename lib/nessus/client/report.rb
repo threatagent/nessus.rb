@@ -115,6 +115,18 @@ module Nessus
       end
 
       # @return [Array<Hash>] reports by readablename regex
+      def report_find_by_name(name)
+        report_list.find_all do |report|
+          report['name'] == name
+        end
+      end
+
+      def report_find_by_readablename(readablename)
+        report_list.find_all do |report|
+          report['readablename'] == readablename
+        end
+      end
+
       def report_find_all(name)
         report_list.find_all do |report|
           report['readablename'] =~ /#{name}/i
@@ -149,10 +161,65 @@ module Nessus
             end
           }
         end
-
         report_hash = report_element_array.inject(:merge)
         json_report = JSON.pretty_generate(report_hash)
       end
+
+      def report_plugin_summary(report_findings)
+        ip_findings_arr = report_findings.map do |hostname, reports|
+          [
+            reports.map { |report|
+                if report['findings']['portdetails']['reportitem'].is_a? Hash
+                  {
+                    'plugin_id' => report['findings']['portdetails']['reportitem']['pluginid'],
+                    'plugin_name' => report['findings']['portdetails']['reportitem']['pluginname'],
+                  }
+                else
+                  report['findings']['portdetails']['reportitem'].map do |report_item|
+                    {
+                      'plugin_id' => report_item['pluginid'],
+                      'plugin_name' => report_item['pluginname']
+                    }
+                  end
+                end
+            }.flatten,
+            hostname
+          ]
+        end
+        ip_findings = Hash[ip_findings_arr]
+
+        plugin_id_arr = ip_findings.keys.flatten.uniq.map do |ip_finding|
+          [
+            ip_finding['plugin_id'],
+            {
+              'hosts' => ip_findings.map { |ids, hostname|
+                           if ids.map { |id| id['plugin_id'] }.include? ip_finding['plugin_id']
+                             hostname
+                           end
+                         }.compact,
+              'plugin_name' => ip_finding['plugin_name']
+            }
+          ]
+        end
+        plugin_id_to_hostname = Hash[plugin_id_arr]
+      end
+
+      def report_item(report_findings, host, plugin_id)
+        report_findings[host].map { |report|
+          if report['findings']['portdetails']['reportitem'].is_a? Hash
+            if report['findings']['portdetails']['reportitem']['pluginid'].eql? plugin_id
+              report['findings']['portdetails']['reportitem']
+            end
+          else
+            report['findings']['portdetails']['reportitem'].find_all do |report_item|
+              if report_item['pluginid'].eql? plugin_id
+                report_item
+              end
+            end
+          end
+        }.flatten.compact
+      end
+
       # @!endgroup
     end
   end
