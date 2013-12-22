@@ -173,12 +173,14 @@ module Nessus
                   {
                     'plugin_id' => report['findings']['portdetails']['reportitem']['pluginid'],
                     'plugin_name' => report['findings']['portdetails']['reportitem']['pluginname'],
+                    'severity' => report['findings']['portdetails']['reportitem']['severity'],
                   }
                 else
                   report['findings']['portdetails']['reportitem'].map do |report_item|
                     {
                       'plugin_id' => report_item['pluginid'],
-                      'plugin_name' => report_item['pluginname']
+                      'plugin_name' => report_item['pluginname'],
+                      'severity' => report_item['severity']
                     }
                   end
                 end
@@ -197,11 +199,13 @@ module Nessus
                              hostname
                            end
                          }.compact,
-              'plugin_name' => ip_finding['plugin_name']
+              'plugin_name' => ip_finding['plugin_name'],
+              'severity' => ip_finding['severity']
             }
           ]
         end
         plugin_id_to_hostname = Hash[plugin_id_arr]
+        plugin_id_to_hostname.sort_by { |id, s| s['severity'] }
       end
 
       def report_item(report_findings, host, plugin_id)
