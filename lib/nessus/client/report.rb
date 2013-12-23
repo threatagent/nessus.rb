@@ -205,7 +205,7 @@ module Nessus
           ]
         end
         plugin_id_to_hostname = Hash[plugin_id_arr]
-        plugin_id_to_hostname.sort_by { |id, s| s['severity'] }
+        Hash[plugin_id_to_hostname.sort_by { |id, s| s['severity'] }]
       end
 
       def report_item(report_findings, host, plugin_id)
