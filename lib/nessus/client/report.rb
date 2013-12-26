@@ -224,6 +224,38 @@ module Nessus
         }.flatten.compact
       end
 
+      def report_parse(report)
+        doc = Nokogiri::XML(report)
+        report_data = doc.css('ReportHost').map { |report_host|
+          {
+            report_host.attributes['name'].value => report_host.css('ReportItem').map { |report_item|
+            report_item.map { |key, attribute|
+              {
+                key.downcase => attribute
+              }
+            }.inject(:merge).merge({
+              'data' => %w[
+                description fname
+                  plugin_modification_date plugin_name
+                  plugin_publication_date plugin_type
+                  risk_factor script_version
+                  solution synopsis
+                  plugin_output
+                ].map { |report_subitem|
+                  report_item.css(report_subitem).map { |node|
+                    {
+                      node.name => node.text
+                    }
+                  }
+                }.flatten.inject(:merge)
+              })
+            }
+          }
+        }.inject(:merge).sort_by { |k, v| k }
+
+        Hash[report_data]
+      end
+
       # @!endgroup
     end
   end
