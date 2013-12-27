@@ -199,7 +199,7 @@ module Nessus
         pluginid_to_hostnames = Hash[pluginid_arr]
       end
 
-      def report_item(report_findings, host, plugin_id)
+      def report_item(report_findings, hostname, plugin_id)
         report_findings[hostname].find_all do |report_item|
           report_item['pluginid'].eql? plugin_id
         end
