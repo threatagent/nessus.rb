@@ -11,23 +11,6 @@ module Nessus
       #
       # @return [Hash] the newly created scan object
 
-      def template_new(template_name, policy_id, target, seq = nil, start_time = nil, rrules = nil)
-        payload = {
-          :template_name => template_name,
-          :policy_id => policy_id,
-          :target => target,
-          :json => 1
-        }
-        payload[:seq] = seq if seq
-        response = post '/scan/new', payload
-
-        if response['reply']['status'].eql? 'ERROR'
-          raise Nessus::UnknownError, response['reply']['contents']
-        end
-
-        response['reply']['contents'] # ['scan']
-      end
-
       def scan_new(target, policy_id, scan_name, seq = nil)
         payload = {
           :target => target,
@@ -82,6 +65,33 @@ module Nessus
         response = post '/scan/resume', :scan_uuid => scan_uuid
         response['reply']['contents']
       end
-    end
+ 
+ 
+      # POST /scan/template/new
+      #
+      # @param [String] scan template name
+      # @param [String] scan policy identifier
+      # @param [String] targets for scan template
+      #
+      # @return status OK if successful
+      def scan_template_new(template_name, policy_id, target, seq = nil, start_time = nil, rrules = nil)
+        payload = {
+          :template_name => template_name,
+          :policy_id => policy_id,
+          :target => target,
+          :json => 1
+        }
+        payload[:seq] = seq if seq
+        payload[:startTime] = start_time if start_time
+        payload[:rRules] = rrules if rrules
+        response = post '/scan/template/new', payload
+
+        if response['reply']['status'].eql? 'ERROR'
+          raise Nessus::UnknownError, response['reply']['contents']
+        end
+
+        response['reply']['contents'] # ['scan']
+      end
+   end
   end
 end
