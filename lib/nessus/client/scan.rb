@@ -10,6 +10,24 @@ module Nessus
       # @param [Fixnum] seq a unique identifier for the specific request
       #
       # @return [Hash] the newly created scan object
+
+      def template_new(template_name, policy_id, target, seq = nil, start_time = nil, rrules = nil)
+        payload = {
+          :template_name => template_name,
+          :policy_id => policy_id,
+          :target => target,
+          :json => 1
+        }
+        payload[:seq] = seq if seq
+        response = post '/scan/new', payload
+
+        if response['reply']['status'].eql? 'ERROR'
+          raise Nessus::UnknownError, response['reply']['contents']
+        end
+
+        response['reply']['contents'] # ['scan']
+      end
+
       def scan_new(target, policy_id, scan_name, seq = nil)
         payload = {
           :target => target,
