@@ -33,13 +33,13 @@ module Nessus
       connection_options[:ssl] ||= {}
       connection_options[:ssl][:verify] = Nessus::Client.verify_ssl.nil? || Nessus::Client.verify_ssl
 
+      @connection = Faraday.new host, connection_options
+      @connection.headers[:user_agent] = "Nessus.rb v#{Nessus::VERSION}".freeze
+
       # allow passing a block to Faraday::Connection
       if block_given?
-        @connection = Faraday.new host, connection_options, &Proc.new
-      else
-        @connection = Faraday.new host, connection_options
+        yield @connection
       end
-      @connection.headers[:user_agent] = "Nessus.rb v#{Nessus::VERSION}".freeze
 
       authenticate(login, password) if login && password
     end
