@@ -37,9 +37,7 @@ module Nessus
       @connection.headers[:user_agent] = "Nessus.rb v#{Nessus::VERSION}".freeze
 
       # allow passing a block to Faraday::Connection
-      if block_given?
-        yield @connection
-      end
+      yield @connection if block_given?
 
       authenticate(login, password) if login && password
     end
