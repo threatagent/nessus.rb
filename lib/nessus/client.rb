@@ -31,7 +31,7 @@ module Nessus
     # @param [String] host the base URL to use when connecting to the Nessus API
     def initialize(host, login = nil, password = nil, connection_options = {})
       connection_options[:ssl] ||= {}
-      connection_options[:ssl][:verify] = Nessus::Client.verify_ssl.nil? || Nessus::Client.verify_ssl
+      connection_options[:ssl][:verify] ||= Nessus::Client.verify_ssl.nil? || Nessus::Client.verify_ssl
 
       @connection = Faraday.new host, connection_options
       @connection.headers[:user_agent] = "Nessus.rb v#{Nessus::VERSION}".freeze
