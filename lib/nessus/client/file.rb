@@ -10,6 +10,14 @@ module Nessus
         resp = connection.get '/file/report/download', :report => uuid
         resp.body
       end
+
+      # GET /file/xslt/list
+      #
+      # @return [Array<Hash>] an object containing a list of XSLT transformations
+      def xslt_list
+        response = post '/file/xslt/list'
+        response['reply']['contents']
+      end
     end
   end
 end

@@ -10,14 +10,6 @@ module Nessus
         response['reply']['contents']['reports']['report']
       end
 
-      # GET /file/xslt/list
-      #
-      # @return [Array<Hash>] an object containing a list of XSLT transformations
-      def xslt_list
-        response = post '/file/xslt/list'
-        response['reply']['contents']
-      end
-
       # POST /report/delete
       #
       # @param [String] report unique identifier
