@@ -36,7 +36,7 @@ module Nessus
       @connection = Faraday.new host, connection_options
       @connection.headers[:user_agent] = "Nessus.rb v#{Nessus::VERSION}".freeze
 
-      # allow passing a block to Faraday::Connection
+      # Allow passing a block to Faraday::Connection
       yield @connection if block_given?
 
       authenticate(login, password) if login && password
@@ -95,8 +95,10 @@ module Nessus
     # @param [Hash] params the query parameters to send with the request
     # @param [Hash] headers the headers to send along with the request
     def get(url, params = {}, headers = {})
+      retries ||= 0
+
       unless authenticated?
-        raise Nessus::Forbidden, 'Unable to detect a session token cookie, use #authenticate before sending any other requests'
+        fail Nessus::Forbidden, 'Unable to detect a session token cookie, use #authenticate before sending any other requests'
       end
 
       params ||= {}
@@ -106,6 +108,13 @@ module Nessus
       headers = connection.headers.merge(headers)
       resp    = connection.get url, params, headers
       JSON.parse(resp.body)
+    rescue Nessus::Forbidden
+      if retries < 1
+        authenticate(login, password) if login && password
+        retry
+      else
+        raise Nessus::Forbidden, 'Unable to automatically reauthenticate'
+      end
     end
 
     # @param [String] url the URL/path to send a GET request using the
@@ -113,8 +122,10 @@ module Nessus
     # @param [Hash] payload the JSON body to send with the request
     # @param [Hash] headers the headers to send along with the request
     def post(url, payload = nil, headers = nil, &block)
+      retries ||= 0
+
       unless authenticated?
-        raise Nessus::Forbidden, 'Unable to detect a session token cookie, use #authenticate before sending any other requests'
+        fail Nessus::Forbidden, 'Unable to detect a session token cookie, use #authenticate before sending any other requests'
       end
 
       payload ||= {}
@@ -122,6 +133,14 @@ module Nessus
 
       resp = connection.post(url, payload, headers, &block)
       JSON.parse(resp.body)
+    rescue Nessus::Forbidden
+      if retries < 1
+        retries += 1
+        authenticate(login, password) if login && password
+        retry
+      else
+        raise Nessus::Forbidden, 'Unable to automatically reauthenticate'
+      end
     end
   end
 end
