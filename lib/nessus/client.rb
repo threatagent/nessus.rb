@@ -51,7 +51,7 @@ module Nessus
         :login => login,
         :password => password
       }
-      resp = connection.post '/login', payload
+      resp = post '/login', payload
       resp = JSON.parse(resp.body)
 
       if resp['reply']['status'].eql? 'OK'
