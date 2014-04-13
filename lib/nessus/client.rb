@@ -110,6 +110,7 @@ module Nessus
       JSON.parse(resp.body)
     rescue Nessus::Forbidden
       if retries < 1
+        retries += 1
         authenticate(login, password) if login && password
         retry
       else
