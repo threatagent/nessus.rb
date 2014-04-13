@@ -35,6 +35,7 @@ module Nessus
 
       @connection = Faraday.new host, connection_options
       @connection.headers[:user_agent] = "Nessus.rb v#{Nessus::VERSION}".freeze
+      @connection.response = :json
 
       # allow passing a block to Faraday::Connection
       yield @connection if block_given?
@@ -53,7 +54,6 @@ module Nessus
         :json => 1
       }
       resp = connection.post '/login', payload
-      resp = JSON.parse(resp.body)
 
       if resp['reply']['status'].eql? 'OK'
         connection.headers[:cookie] = "token=#{resp['reply']['contents']['token']}"
@@ -104,8 +104,7 @@ module Nessus
 
       params  = connection.params.merge(params)
       headers = connection.headers.merge(headers)
-      resp    = connection.get url, params, headers
-      JSON.parse(resp.body)
+      connection.get url, params, headers
     end
 
     # @param [String] url the URL/path to send a GET request using the
@@ -120,8 +119,7 @@ module Nessus
       payload ||= {}
       payload[:json] ||= 1
 
-      resp = connection.post(url, payload, headers, &block)
-      JSON.parse(resp.body)
+      connection.post(url, payload, headers, &block)
     end
   end
 end
