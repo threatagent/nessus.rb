@@ -49,8 +49,7 @@ module Nessus
     def authenticate(login, password)
       payload = {
         :login => login,
-        :password => password,
-        :json => 1
+        :password => password
       }
       resp = connection.post '/login', payload
       resp = JSON.parse(resp.body)
@@ -68,7 +67,7 @@ module Nessus
     # @param [String] login the username of the account to use for authentication
     # @param [String] password the password of the account to use for authentication
     def logout
-      resp = post '/logout', :json => 1
+      resp = post '/logout'
 
       if resp['reply']['status'].eql? 'OK'
         if connection.headers[:cookie].include? 'token='
@@ -100,7 +99,7 @@ module Nessus
       end
 
       params ||= {}
-      params[:json] ||= 1
+      params[:json] = 1
 
       params  = connection.params.merge(params)
       headers = connection.headers.merge(headers)
@@ -118,7 +117,7 @@ module Nessus
       end
 
       payload ||= {}
-      payload[:json] ||= 1
+      payload[:json] = 1
 
       resp = connection.post(url, payload, headers, &block)
       JSON.parse(resp.body)

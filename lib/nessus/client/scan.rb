@@ -15,8 +15,7 @@ module Nessus
         payload = {
           :target => target,
           :policy_id => policy_id,
-          :scan_name => scan_name,
-          :json => 1
+          :scan_name => scan_name
         }
         payload[:seq] = seq if seq
         response = post '/scan/new', payload
@@ -78,8 +77,7 @@ module Nessus
         payload = {
           :template_name => template_name,
           :policy_id => policy_id,
-          :target => target,
-          :json => 1
+          :target => target
         }
         payload[:seq] = seq if seq
         payload[:startTime] = start_time if start_time
