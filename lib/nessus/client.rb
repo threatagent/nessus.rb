@@ -101,15 +101,18 @@ module Nessus
       retries ||= 0
 
       unless authenticated?
-        fail Nessus::Forbidden, 'Unable to detect a session token cookie, use #authenticate before sending any other requests'
+        fail Nessus::Unauthorized, 'Unable to detect a session token cookie, use #authenticate before sending any other requests'
       end
 
       params ||= {}
       params[:json] ||= 1
 
       resp    = connection.get url, params, headers
+      fail Nessus::Unauthorized if resp.status == 401
+      fail Nessus::Forbidden if resp.status == 403
+
       JSON.parse(resp.body)
-    rescue Nessus::Forbidden
+    rescue Nessus::Unauthorized, Nessus::Forbidden
       if retries < 1
         retries += 1
         authenticate(@login, @password) if @login && @password
@@ -127,15 +130,18 @@ module Nessus
       retries ||= 0
 
       unless authenticated?
-        fail Nessus::Forbidden, 'Unable to detect a session token cookie, use #authenticate before sending any other requests'
+        fail Nessus::Unauthorized, 'Unable to detect a session token cookie, use #authenticate before sending any other requests'
       end
 
       payload ||= {}
       payload[:json] ||= 1
 
       resp = connection.post(url, payload, headers, &block)
+      fail Nessus::Unauthorized if resp.status == 401
+      fail Nessus::Forbidden if resp.status == 403
+
       JSON.parse(resp.body)
-    rescue Nessus::Forbidden
+    rescue Nessus::Unauthorized, Nessus::Forbidden
       if retries < 1
         retries += 1
         authenticate(@login, @password) if @login && @password
