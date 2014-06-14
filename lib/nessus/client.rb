@@ -47,6 +47,9 @@ module Nessus
     # @param [String] login the username of the account to use for authentication
     # @param [String] password the password of the account to use for authentication
     def authenticate(login, password)
+      @login    = login
+      @password = password
+
       payload = {
         :login => login,
         :password => password,
@@ -111,7 +114,7 @@ module Nessus
     rescue Nessus::Forbidden
       if retries < 1
         retries += 1
-        authenticate(login, password) if login && password
+        authenticate(@login, @password) if @login && @password
         retry
       else
         raise Nessus::Forbidden, 'Unable to automatically reauthenticate'
@@ -137,7 +140,7 @@ module Nessus
     rescue Nessus::Forbidden
       if retries < 1
         retries += 1
-        authenticate(login, password) if login && password
+        authenticate(@login, @password) if @login && @password
         retry
       else
         raise Nessus::Forbidden, 'Unable to automatically reauthenticate'
