@@ -107,8 +107,6 @@ module Nessus
       params ||= {}
       params[:json] ||= 1
 
-      params  = connection.params.merge(params)
-      headers = connection.headers.merge(headers)
       resp    = connection.get url, params, headers
       JSON.parse(resp.body)
     rescue Nessus::Forbidden
