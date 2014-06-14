@@ -47,6 +47,9 @@ module Nessus
     # @param [String] login the username of the account to use for authentication
     # @param [String] password the password of the account to use for authentication
     def authenticate(login, password)
+      @login    = login
+      @password = password
+
       payload = {
         :login => login,
         :password => password,
@@ -98,20 +101,21 @@ module Nessus
       retries ||= 0
 
       unless authenticated?
-        fail Nessus::Forbidden, 'Unable to detect a session token cookie, use #authenticate before sending any other requests'
+        fail Nessus::Unauthorized, 'Unable to detect a session token cookie, use #authenticate before sending any other requests'
       end
 
       params ||= {}
       params[:json] ||= 1
 
-      params  = connection.params.merge(params)
-      headers = connection.headers.merge(headers)
       resp    = connection.get url, params, headers
+      fail Nessus::Unauthorized if resp.status == 401
+      fail Nessus::Forbidden if resp.status == 403
+
       JSON.parse(resp.body)
-    rescue Nessus::Forbidden
+    rescue Nessus::Unauthorized, Nessus::Forbidden
       if retries < 1
         retries += 1
-        authenticate(login, password) if login && password
+        authenticate(@login, @password) if @login && @password
         retry
       else
         raise Nessus::Forbidden, 'Unable to automatically reauthenticate'
@@ -126,18 +130,21 @@ module Nessus
       retries ||= 0
 
       unless authenticated?
-        fail Nessus::Forbidden, 'Unable to detect a session token cookie, use #authenticate before sending any other requests'
+        fail Nessus::Unauthorized, 'Unable to detect a session token cookie, use #authenticate before sending any other requests'
       end
 
       payload ||= {}
       payload[:json] ||= 1
 
       resp = connection.post(url, payload, headers, &block)
+      fail Nessus::Unauthorized if resp.status == 401
+      fail Nessus::Forbidden if resp.status == 403
+
       JSON.parse(resp.body)
-    rescue Nessus::Forbidden
+    rescue Nessus::Unauthorized, Nessus::Forbidden
       if retries < 1
         retries += 1
-        authenticate(login, password) if login && password
+        authenticate(@login, @password) if @login && @password
         retry
       else
         raise Nessus::Forbidden, 'Unable to automatically reauthenticate'
