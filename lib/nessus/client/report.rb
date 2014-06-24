@@ -106,7 +106,7 @@ module Nessus
         end
       end
 
-      # @return [Array<Hash>] reports by readablename regex
+      # @return [Array<Hash>] reports by readableName regex
       def report_find_by_name(name)
         if report_list.is_a? Array
           report_list.find_all do |report|
@@ -117,20 +117,20 @@ module Nessus
         end
       end
 
-      def report_find_by_readablename(readablename)
+      def report_find_by_readable_name(name)
         report_list.find_all do |report|
-          report['readablename'] == readablename
+          report['readableName'] == name
         end
       end
 
       def report_find_all(name)
         report_list.find_all do |report|
-          report['readablename'] =~ /#{name}/i
+          report['readableName'] =~ /#{name}/i
         end
       end
 
-      def report_readablename(name)
-        report_list.find{|report| report['name'].eql? name}['readablename']
+      def report_readable_name(name)
+        report_list.find{|report| report['name'].eql? name}['readableName']
       end
 
       def report_findings(report)
