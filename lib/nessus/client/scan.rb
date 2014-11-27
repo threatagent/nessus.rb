@@ -10,7 +10,6 @@ module Nessus
       # @param [Fixnum] seq a unique identifier for the specific request
       #
       # @return [Hash] the newly created scan object
-
       def scan_new(target, policy_id, scan_name, seq = nil, description = nil)
         payload = {
           :custom_targets => target,
@@ -65,7 +64,6 @@ module Nessus
         response = post '/scan/resume', :scan_uuid => scan_uuid
         response['reply']['contents']
       end
-
 
       # POST /scan/template/new
       #
