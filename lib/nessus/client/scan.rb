@@ -11,17 +11,18 @@ module Nessus
       #
       # @return [Hash] the newly created scan object
 
-      def scan_new(target, policy_id, scan_name, seq = nil)
+      def scan_new(target, policy_id, scan_name, seq = nil, description = nil)
         payload = {
-          :target => target,
+          :custom_targets => target,
           :policy_id => policy_id,
-          :scan_name => scan_name
+          :name => scan_name
         }
         payload[:seq] = seq if seq
+        payload[:description] = description if description
         response = post '/scan/new', payload
 
-        if response['reply']['status'].eql? 'ERROR'
-          raise Nessus::UnknownError, response['reply']['contents']
+        if response['error']
+          raise Nessus::UnknownError, response['error']
         end
 
         response['reply']['contents'] # ['scan']
@@ -64,8 +65,8 @@ module Nessus
         response = post '/scan/resume', :scan_uuid => scan_uuid
         response['reply']['contents']
       end
- 
- 
+
+
       # POST /scan/template/new
       #
       # @param [String] scan template name
@@ -90,6 +91,6 @@ module Nessus
 
         response['reply']['contents'] # ['scan']
       end
-   end
+    end
   end
 end
